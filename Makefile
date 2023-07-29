@@ -4,4 +4,9 @@ test:
 
 .PHONY: install
 install:
-	@python3 -m virtualenv env && . env/bin/activate && pip install -r fromchaos/requirements.txt
+	@python3 -m virtualenv env && . env/bin/activate && pip install -r requirements.txt
+
+.PHONY: publish
+publish:
+	@python setup.py sdist bdist_wheel
+	@twine upload dist/*
