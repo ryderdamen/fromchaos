@@ -60,7 +60,7 @@ For a quick summary of something, use the FromChaosShortString class.
 
 
 ```python
-from FromChaos import FromChaosShortString
+from fromchaos import FromChaosShortString
 
 context = """
 Some very large text that talks about a variety of different things. Canada is a really big country. Australia is also big, but there are spiders. Italy has very good food. There's really good beef noodle soup in Taiwan.
@@ -88,7 +88,7 @@ The text talks about various characteristics of Canada, Australia, Italy, and Ta
 For classifying something as either True, False, or None, use the FromChaosBoolOrNone class.
 
 ```python
-from FromChaos import FromChaosBoolOrNone
+from fromchaos import FromChaosBoolOrNone
 
 context = """
 Some very large text that talks about a variety of different things. Canada is a really big country. Australia is also big, but there are spiders. Italy has very good food. There's really good beef noodle soup in Taiwan.
@@ -117,7 +117,7 @@ FromChaosParagraph works similar to FromChaosShortString, except instead of a su
 
 
 ```python
-
+from fromchaos import FromChaosParagraph
 
 context = """
 The working holiday visa is valid for 12 months and it cannot be renewed. Applicants must show proof of funds. To apply, visit the consolate and pay the application fee of $65 CAD, then wait 3 weeks.
@@ -126,7 +126,7 @@ The working holiday visa is valid for 12 months and it cannot be renewed. Applic
 question = "Summarize this visa."
 
 try:
-    chaos = FromChaosParagraph(question, context, model='gpt-4')
+    chaos = FromChaosParagraph(question, context, model='gpt-4', max_chars=2000)
     print(chaos.response)
 except Exception:
     print('An error occured')
@@ -145,7 +145,7 @@ This visa is a working-holiday visa, with a validity of 12 months. This visa is 
 FromChaosDict allows you to pass in a dictionary of your choosing as a sample object, and get the response in the same format.
 
 ```python
-
+from fromchaos import FromChaosDict
 
 context = """
 The working holiday visa is valid for 12 months and it cannot be renewed. Applicants must show proof of funds. To apply, visit the consolate and pay the application fee of $65 CAD, then wait 3 weeks.

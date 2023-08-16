@@ -185,7 +185,7 @@ class FromChaosParagraph(FromChaos):
             return False
         if len(response) < 3:
             return False
-        if len(response) > 2000:
+        if len(response) > int(self.kwargs.get('max_length', 5000)):
             return False
         return True
 
