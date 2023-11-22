@@ -1,7 +1,7 @@
 import logging
 import json
 import os
-import openai
+from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 
@@ -53,7 +53,7 @@ class FromChaos():
             }
         ]
 
-    @retry(wait=wait_fixed(2), stop=stop_after_attempt(2))
+    @retry(wait=wait_fixed(2), stop=stop_after_attempt(2), reraise=True)
     def _openai_get_chat_completion(self, question):
         """Returns the chat completion for the given prompt"""
         try:
@@ -62,14 +62,15 @@ class FromChaos():
                 "role": 'user',
                 "content": question
             })
-            completion = openai.ChatCompletion.create(
+            client = OpenAI()
+            completion = client.chat.completions.create(
                 model=self.model,
                 temperature=self.model_temperature,
                 messages=prompt
             )
             response = completion.choices[0].message.content
             return response
-        except openai.InvalidRequestError as e:
+        except Exception as e:
             if 'context_length_exceeded' in str(e):
                 print('Context length exceeded. Reduce the length of the question/context.')
             else:
@@ -255,14 +256,6 @@ class FromChaosDict(FromChaos):
         # Check if both dictionaries have the same keys
         if set(dict1.keys()) != set(dict2.keys()):
             return False
-        # Check if values for each key in both dictionaries have the same type and structure
-        # for key in dict1:
-        #     if type(dict1[key]) != type(dict2[key]):
-        #         return False
-        #     # If the value is a dictionary, apply recursion
-        #     if isinstance(dict1[key], dict):
-        #         if not self.is_same_structure_and_type(dict1[key], dict2[key]):
-        #             return False
         return True
 
     def response_is_valid(self, response):
