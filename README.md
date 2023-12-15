@@ -1,5 +1,5 @@
 # From Chaos
-A python library for extracting organized data out of chaos using large-language-models (LLMs) like ChatGPT.
+A python library for extracting organized data out of chaos using large-language-models (LLMs) like ChatGPT and Gemini-Pro.
 
 
 ## Installation
