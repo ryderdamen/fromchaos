@@ -2,11 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='fromchaos',
-    version='0.0.6',
+    version='0.0.7',
     packages=find_packages(),
     install_requires=[
-        'openai',
-        'tenacity',
+        'openai==1.4.0',
+        'tenacity==8.2.2',
+        'google-generativeai==0.3.1'
     ],
     author='Ryder Damen',
     author_email='dev@ryderdamen.com',

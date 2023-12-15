@@ -3,6 +3,7 @@ import json
 import os
 from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_fixed
+import google.generativeai as genai
 
 
 class FromChaos():
@@ -15,6 +16,10 @@ class FromChaos():
         self.prompt = ''
         self.response_raw = ''
         self.model_temperature = float(kwargs.get('temperature', 0.2))
+        self.characters_input = 0
+        self.characters_output = 0
+        self.pricing_input = 0.0
+        self.pricing_output = 0.0
         self.check_kwargs()
         self.run()
 
@@ -23,6 +28,22 @@ class FromChaos():
         self.prompt = self.get_prompt()
         self.response_raw = self.ask_llm(self.prompt)
         self.response = self.process_response(self.response_raw)
+        self.calculate_pricing()
+
+    def get_cost(self):
+        return self.pricing_input + self.pricing_output
+ 
+    def calculate_pricing(self):
+        self.count_characters()
+        if self.model == 'gemini-pro':
+            cpc_input = 0.00025 / 1000.0
+            cpc_output = 0.0005 / 1000.0
+        self.pricing_input = float(self.characters_input) * cpc_input
+        self.pricing_output = float(self.characters_output) * cpc_output
+    
+    def count_characters(self):
+        self.characters_input = len(self.prompt)
+        self.characters_output = len(self.response_raw)
 
     def get_prompt(self):
         return f"""
@@ -45,19 +66,21 @@ class FromChaos():
             if kwarg not in self.kwargs:
                 raise Exception(f'{kwarg}= kwarg must be defined')
 
-    def _openai_construct_initial_prompt(self):
+    def _construct_initial_prompt(self, **kwargs):
         """Construct an initial prompt for ChatGPT"""
-        return [
-            {   "role": "system",
-                "content": "You are a data parsing assistant. You take context data, and answer a question about it in a specific format."
-            }
-        ]
+        initial = "You are a data parsing assistant. You take context data, and answer a question about it in a specific format."
+        if kwargs.get('openai', False):
+            return [
+                {   "role": "system",
+                    "content": initial
+                }
+            ]
+        return initial
 
-    @retry(wait=wait_fixed(2), stop=stop_after_attempt(2), reraise=True)
     def _openai_get_chat_completion(self, question):
         """Returns the chat completion for the given prompt"""
         try:
-            prompt = self._openai_construct_initial_prompt()
+            prompt = self._construct_initial_prompt(openai=True)
             prompt.append({
                 "role": 'user',
                 "content": question
@@ -76,15 +99,27 @@ class FromChaos():
             else:
                 raise e
 
+    def _gcp_get_prompt_response(self, question):
+        """Returns the response for a given prompt"""
+        instructions = []
+        instructions.append(self._construct_initial_prompt(openai=False))
+        instructions.append('\n')
+        instructions.append(question)
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(instructions)
+        return response.text
+
     def ask(self, question, **kwargs):
         return self._get_chat_completion(question)
-    
+
     def ask_llm(self, prompt):
         """Asks the corresponding LLM based on the """
         if self.model == 'gpt-3.5-turbo':
             return self._openai_get_chat_completion(prompt)
         if self.model == 'gpt-4':
             return self._openai_get_chat_completion(prompt)
+        if self.model == 'gemini-pro':
+            return self._gcp_get_prompt_response(prompt)
         raise Exception('Model is not implemented - choose a different LLM')
 
     def basic_sanitization(self, response):
