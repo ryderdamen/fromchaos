@@ -15,6 +15,7 @@ class FromChaos():
         self.context = context
         self.prompt = ''
         self.response_raw = ''
+        self.max_output_tokens = kwargs.get('max_output_tokens', 2048)
         self.model_temperature = float(kwargs.get('temperature', 0.2))
         self.characters_input = 0
         self.characters_output = 0
@@ -105,8 +106,11 @@ class FromChaos():
         instructions.append(self._construct_initial_prompt(openai=False))
         instructions.append('\n')
         instructions.append(question)
+        config = {
+            'max_output_tokens': self.max_output_tokens,
+        }
         model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(instructions)
+        response = model.generate_content(instructions, generation_config=config)
         return response.text
 
     def ask(self, question, **kwargs):
