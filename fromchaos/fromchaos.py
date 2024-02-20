@@ -118,9 +118,13 @@ class FromChaos():
 
     def ask_llm(self, prompt):
         """Asks the corresponding LLM based on the """
-        if self.model == 'gpt-3.5-turbo':
-            return self._openai_get_chat_completion(prompt)
-        if self.model == 'gpt-4':
+        openai_chat_completion_models = [
+            'gpt-3.5-turbo',
+            'gpt-4',
+            'gpt-4-32k',
+            'gpt-4-0125-preview',
+        ]
+        if self.model in openai_chat_completion_models:
             return self._openai_get_chat_completion(prompt)
         if self.model == 'gemini-pro':
             return self._gcp_get_prompt_response(prompt)
